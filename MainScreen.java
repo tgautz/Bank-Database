@@ -5,6 +5,7 @@
  */
 package database;
 
+import java.sql.*;
 /**
  *
  * @author Orc 9
@@ -16,6 +17,55 @@ public class MainScreen extends javax.swing.JFrame {
      */
     public MainScreen() {
         initComponents();
+        try {
+            //initialize variables
+            Connection c = DriverManager.getConnection("jdbc:sqlite:bank.db");
+            c.setAutoCommit(false);
+            Statement stmt = c.createStatement();
+            //create tables in the database
+            String sql = "";
+            sql =   "CREATE TABLE CUSTOMER(" +
+                    "SSN		CHAR(9)		PRIMARY KEY," +
+                    "Full_name		VARCHAR(80)	NOT NULL," +
+                    "Birthdate		DATE		NOT NULL," +
+                    "Sex		CHAR(1));";
+            stmt.executeUpdate(sql);
+            sql =   "CREATE TABLE EMPLOYEE(" +
+                    "SSN		CHAR(9)		PRIMARY KEY," +
+                    "Full_name		VARCHAR(80)	NOT NULL," +
+                    "Birthdate		DATE		NOT NULL," +
+                    "Sex		CHAR(1)," +
+                    "Position		VARCHAR(20)," +
+                    "Hourly_wage	DECIMAL(5,2)	NOT NULL);";
+            stmt.executeUpdate(sql);
+            sql =   "CREATE TABLE ACCOUNT(" +
+                    "ID			INT		PRIMARY KEY," +
+                    "Balance		DOUBLE(16,2)	NOT NULL," +
+                    "Interest_rate	DOUBLE(6,5));";
+            stmt.executeUpdate(sql);
+            sql =   "CREATE TABLE ACCOUNT_AUTHORIZATION(" +
+                    "ID			INT," +
+                    "CSSN		CHAR(9)," +
+                    "PRIMARY KEY(ID, CSSN)," +
+                    "FOREIGN KEY (ID) REFERENCES ACCOUNT(ID)," +
+                    "FOREIGN KEY (CSSN) REFERENCES CUSTOMER(SSN));";
+            stmt.executeUpdate(sql);
+            sql =   "CREATE TABLE TRANS_ACTION(" +
+                    "Timestamp		DATETIME," +
+                    "CSSN		CHAR(9)," +
+                    "Account_ID         INT		NOT NULL," +
+                    "Type		VARCHAR(10)	NOT NULL," +
+                    "Amount		DOUBLE(16,2)	NOT NULL," +
+                    "ESSN		CHAR(9)		NOT NULL," +
+                    "PRIMARY KEY(Timestamp, CSSN)," +
+                    "FOREIGN KEY (CSSN) REFERENCES CUSTOMER(SSN)," +
+                    "FOREIGN KEY (Account_ID) REFERENCES ACCOUNT(ID)," +
+                    "FOREIGN KEY (ESSN) REFERENCES EMPLOYEE(SSN));";
+            stmt.executeUpdate(sql);
+        }
+        catch (SQLException e) {
+            System.out.println("\nSomething went wrong...: "+e.getMessage());
+        }
     }
 
     /**
