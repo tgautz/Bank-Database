@@ -12,6 +12,7 @@ import java.sql.*;
  */
 public class MainScreen extends javax.swing.JFrame {
 
+    private Statement stmt;
     /**
      * Creates new form MainScreen
      */
@@ -21,18 +22,18 @@ public class MainScreen extends javax.swing.JFrame {
             //initialize variables
             Connection c = DriverManager.getConnection("jdbc:sqlite:bank.db");
             c.setAutoCommit(false);
-            Statement stmt = c.createStatement();
+            stmt = c.createStatement();
             //create tables in the database
             String sql = "";
             sql =   "CREATE TABLE CUSTOMER(" +
                     "SSN		CHAR(9)		PRIMARY KEY," +
-                    "Full_name		VARCHAR(80)	NOT NULL," +
+                    "Full_name		VARCHAR(80)," +
                     "Birthdate		DATE		NOT NULL," +
                     "Sex		CHAR(1));";
             stmt.executeUpdate(sql);
             sql =   "CREATE TABLE EMPLOYEE(" +
                     "SSN		CHAR(9)		PRIMARY KEY," +
-                    "Full_name		VARCHAR(80)	NOT NULL," +
+                    "Full_name		VARCHAR(80)," +
                     "Birthdate		DATE		NOT NULL," +
                     "Sex		CHAR(1)," +
                     "Position		VARCHAR(20)," +
@@ -191,12 +192,12 @@ public class MainScreen extends javax.swing.JFrame {
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         // TODO add your handling code here:
-        new NewPerson(true).setVisible(true);
+        new NewPerson(true, stmt).setVisible(true);
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
         // TODO add your handling code here:
-        new NewPerson(false).setVisible(true);
+        new NewPerson(false, stmt).setVisible(true);
     }//GEN-LAST:event_jButton4ActionPerformed
 
     private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
