@@ -27,7 +27,12 @@ public class NewPerson extends javax.swing.JFrame {
         if(isEmployee)
             setTitle("Add New Employee");
         else
+        {
             setTitle("Add New Customer");
+            jTextField6.setVisible(false);
+            jTextField7.setVisible(false);
+            jLabel1.setVisible(false);
+        }
     }
 
     /**
@@ -50,7 +55,7 @@ public class NewPerson extends javax.swing.JFrame {
         jComboBox2 = new javax.swing.JComboBox();
         jLabel1 = new javax.swing.JLabel();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
         jTextField1.setText("Full Name");
 
@@ -226,6 +231,7 @@ public class NewPerson extends javax.swing.JFrame {
                 
         try {
              stmt.executeUpdate(sql);
+             this.setVisible(false);
         } catch (SQLException e) {
              // TODO Auto-generated catch block
              e.printStackTrace();

@@ -5,6 +5,10 @@
  */
 package database;
 
+import java.sql.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  *
  * @author Orc 9
@@ -15,10 +19,16 @@ public class ViewPerson extends javax.swing.JFrame {
      * Creates new form ViewPerson
      */
     private boolean isEmployee;
-    
-    public ViewPerson(boolean isEmployee) {
+    private Statement stmt;
+
+    public ViewPerson(boolean isEmployee, Statement stmt) {
         initComponents();
         this.isEmployee = isEmployee;
+        this.stmt = stmt;
+        if(isEmployee)
+            setTitle("View Employee(s)");
+        else
+            setTitle("View Customer(s)");
     }
 
     /**
@@ -34,7 +44,7 @@ public class ViewPerson extends javax.swing.JFrame {
         jButton2 = new javax.swing.JButton();
         jTextField1 = new javax.swing.JTextField();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
         jButton1.setText("View Individual");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
@@ -93,7 +103,20 @@ public class ViewPerson extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        // TODO add your handling code here:
+        // View all
+        String sheet;
+        if(isEmployee)
+            sheet = "EMPLOYEE";
+        else
+            sheet = "CUSTOMER";
+        ResultSet rs = null;
+        try {
+            rs = stmt.executeQuery( "SELECT * " +
+                                    "FROM "+sheet+";" );
+            new VisibleTable(isEmployee, rs).setVisible(true);
+        } catch (SQLException ex) {
+            Logger.getLogger(ViewPerson.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_jButton2ActionPerformed
 
     /**
