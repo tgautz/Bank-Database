@@ -15,16 +15,18 @@ import java.util.logging.Logger;
  */
 public class ViewPerson extends javax.swing.JFrame {
 
-    /**
-     * Creates new form ViewPerson
-     */
+    //private global variables
     private boolean isEmployee;
     private Statement stmt;
 
+    //only constructor
     public ViewPerson(boolean isEmployee, Statement stmt) {
+        //initialize GUI
         initComponents();
+        //initialize private variables
         this.isEmployee = isEmployee;
         this.stmt = stmt;
+        //set window name
         if(isEmployee)
             setTitle("View Employee(s)");
         else
@@ -99,14 +101,16 @@ public class ViewPerson extends javax.swing.JFrame {
     }//GEN-LAST:event_jTextField1ActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // View Individual
+        // View Individual button pressed
         String sheet;
+        //choose table name
         if(isEmployee)
             sheet = "EMPLOYEE";
         else
             sheet = "CUSTOMER";
         ResultSet rs = null;
         try {
+            //execute query where name like %text field% and show result in a custom JTable
             rs = stmt.executeQuery( "SELECT * " +
                                     "FROM "+sheet+
                                    " WHERE Full_name LIKE '%"+jTextField1.getText().trim()+"%';" );
@@ -117,14 +121,16 @@ public class ViewPerson extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        // View all
+        // View All button pressed
         String sheet;
+        //choose table name
         if(isEmployee)
             sheet = "EMPLOYEE";
         else
             sheet = "CUSTOMER";
         ResultSet rs = null;
         try {
+            //execute query and show result in a custom JTable
             rs = stmt.executeQuery( "SELECT * " +
                                     "FROM "+sheet+";" );
             new VisibleTable(isEmployee, rs).setVisible(true);

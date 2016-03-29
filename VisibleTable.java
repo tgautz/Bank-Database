@@ -16,32 +16,40 @@ import javax.swing.table.TableColumn;
  */
 public class VisibleTable extends javax.swing.JFrame {
 
-    /**
-     * Creates new form VisibleTable
-     */
-    
+    //only constructor that displays a ResultSet in a JTable
     public VisibleTable(boolean isEmployee, ResultSet rs) {
+        //initialize GUI
         initComponents();
+        //initialize column count
         int maxCol = 6;
+        //if customer, delete last 2 columns and change column count
         if(!isEmployee)
         {
+            //delete 2 columns
             for(int j=0; j<=1; j++)
             {
+                //get enum object
                 Enumeration<TableColumn> temp = jTable1.getColumnModel().getColumns();
+                //get last column
                 for(int i=0; i<5-j; i++)
                     temp.nextElement();
-                TableColumn deleteColumn = temp.nextElement();
-                jTable1.getColumnModel().removeColumn(deleteColumn);
+                //delete last column
+                jTable1.getColumnModel().removeColumn(temp.nextElement());
             }
+            //change column count
             maxCol = 4;
         }
         try {
+            //fill rows of table
             for(int row = 0; rs.next(); row++)
+                //fill columns in this row
                 for(int col = 1; col <= maxCol; col++)
+                    //fill element in visible table
                     jTable1.getModel().setValueAt(rs.getString(col), row, col-1);
         } catch(Exception e) {
             JOptionPane.showMessageDialog(null, "Request failed!!!!");
         }
+        //display JTable with new values
         jTable1.repaint();
     }
 

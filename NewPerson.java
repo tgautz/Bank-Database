@@ -14,21 +14,24 @@ import javax.swing.JOptionPane;
  */
 public class NewPerson extends javax.swing.JFrame {
 
-    /**
-     * Creates new form NewPerson
-     */
+    //private global variables
     private boolean isEmployee;
     private Statement stmt;
     
+    //only constructor
     public NewPerson(boolean isEmployee, Statement stmt) {
+        //initialize GUI
         initComponents();
+        //initialize global variables
         this.isEmployee = isEmployee;
         this.stmt = stmt;
+        //set window name
         if(isEmployee)
             setTitle("Add New Employee");
         else
         {
             setTitle("Add New Customer");
+            //if adding new customer, don't show extra fields
             jTextField6.setVisible(false);
             jTextField7.setVisible(false);
             jLabel1.setVisible(false);
@@ -153,7 +156,8 @@ public class NewPerson extends javax.swing.JFrame {
     }//GEN-LAST:event_jTextField5ActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
+        // Add Person button pressed
+        //initialize all fields to NULL
         String name = "'NULL'";
         String SSN = "'NULL'";
         String sex = "'NULL'";
@@ -162,16 +166,19 @@ public class NewPerson extends javax.swing.JFrame {
         String wage = "'NULL'";
         String sql;
         
+        //error checking -- is SSN 9 characters long?
         if(jTextField2.getText().length() != 9)
         {
             JOptionPane.showMessageDialog(null, "ERROR: SSN is not 9 characters long");//throw error
             return;
         }
+        //error checking -- is year 4 characters long?
         else if(jTextField5.getText().length() != 4)
         {
             JOptionPane.showMessageDialog(null, "ERROR: year must be 4 numbers long");//throw error
             return;
         }
+        //error checking -- is day 2 characters long?
         else if(jTextField4.getText().length() != 2)
         {
             JOptionPane.showMessageDialog(null, "ERROR: day must be 2 numbers long");//throw error
@@ -180,6 +187,7 @@ public class NewPerson extends javax.swing.JFrame {
         else
         {
             try {
+                //error checking -- is Employee pay a number?
                 if(isEmployee)
                     Double.parseDouble(jTextField7.getText());
             }
@@ -188,6 +196,7 @@ public class NewPerson extends javax.swing.JFrame {
                 return;
             }
             try {
+                //error checking -- is year a number?
                 Integer.parseInt(jTextField5.getText());
             }
             catch(Exception e) {
@@ -195,21 +204,33 @@ public class NewPerson extends javax.swing.JFrame {
                 return;
             }
             try {
+                //error checking -- is day a number?
                 Integer.parseInt(jTextField4.getText());
             }
             catch(Exception e) {
                 JOptionPane.showMessageDialog(null, "ERROR: day must be a number");//throw error
                 return;
             }
+            try {
+                //error checking -- is SSN a number?
+                Integer.parseInt(jTextField2.getText());
+            }
+            catch(Exception e) {
+                JOptionPane.showMessageDialog(null, "ERROR: SSN must be a number");//throw error
+                return;
+            }
         }
         //if no errors, add person to database
+        //fill variables based on their text fields
         if(jTextField1.getText().trim().length() > 0)
             name = "'"+jTextField1.getText()+"'";
         SSN = "'"+jTextField2.getText()+"'";
         if(jComboBox2.getSelectedItem().toString() != "Sex")
             sex = "'"+jComboBox2.getSelectedItem().toString()+"'";
+        //combine YYYY-MM-DD into one string
         if(jComboBox1.getSelectedIndex()+1 < 10)
             birthdate = "'"+jTextField5.getText()+"-0"+(jComboBox1.getSelectedIndex()+1)+"-"+jTextField4.getText()+"'";
+        //add to appropriate table
         if(!isEmployee)
             sql = "INSERT INTO CUSTOMER (SSN, Full_Name, Birthdate, Sex) " +
                   "VALUES ("+SSN+", "+ //SSN
@@ -218,8 +239,10 @@ public class NewPerson extends javax.swing.JFrame {
                              sex+");"; //Sex
         else
         {
+            //get position and wage
             position = "'"+jTextField6.getText()+"'";
             wage = "'"+jTextField7.getText()+"'";
+            //add to appropriate table
             sql = "INSERT INTO EMPLOYEE (SSN, Full_Name, Birthdate, Sex, Position, Hourly_wage) " +
                   "VALUES ("+SSN+", "+ //SSN
                              name+", "+ //Full name
@@ -230,6 +253,7 @@ public class NewPerson extends javax.swing.JFrame {
         }
                 
         try {
+             //execute SQL insert and close this window
              stmt.executeUpdate(sql);
              this.setVisible(false);
         } catch (SQLException e) {
