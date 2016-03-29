@@ -25,14 +25,14 @@ public class VisibleTable extends javax.swing.JFrame {
         int maxCol = 6;
         if(!isEmployee)
         {
-            //jTable1.removeColumnSelectionInterval(4, 5);
-            Enumeration<TableColumn> temp = jTable1.getColumnModel().getColumns();
-            for(int i=0; i<4; i++)
-                temp.nextElement();
-            TableColumn deleteColumn = temp.nextElement();
-            jTable1.getColumnModel().removeColumn(deleteColumn);
-            //jTable1.getColumnModel().removeColumn(temp.nextElement());
-            
+            for(int j=0; j<=1; j++)
+            {
+                Enumeration<TableColumn> temp = jTable1.getColumnModel().getColumns();
+                for(int i=0; i<5-j; i++)
+                    temp.nextElement();
+                TableColumn deleteColumn = temp.nextElement();
+                jTable1.getColumnModel().removeColumn(deleteColumn);
+            }
             maxCol = 4;
         }
         try {

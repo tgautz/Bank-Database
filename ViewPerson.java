@@ -99,7 +99,21 @@ public class ViewPerson extends javax.swing.JFrame {
     }//GEN-LAST:event_jTextField1ActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
+        // View Individual
+        String sheet;
+        if(isEmployee)
+            sheet = "EMPLOYEE";
+        else
+            sheet = "CUSTOMER";
+        ResultSet rs = null;
+        try {
+            rs = stmt.executeQuery( "SELECT * " +
+                                    "FROM "+sheet+
+                                   " WHERE Full_name LIKE '%"+jTextField1.getText().trim()+"%';" );
+            new VisibleTable(isEmployee, rs).setVisible(true);
+        } catch (SQLException ex) {
+            Logger.getLogger(ViewPerson.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
