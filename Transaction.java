@@ -5,6 +5,8 @@
  */
 package database;
 
+import java.sql.*;
+
 /**
  *
  * @author Orc 9
@@ -14,8 +16,11 @@ public class Transaction extends javax.swing.JFrame {
     /**
      * Creates new form Transaction
      */
-    public Transaction() {
+    private Statement stmt;
+    
+    public Transaction(Statement stmt) {
         initComponents();
+        this.stmt = stmt;
     }
 
     /**
@@ -157,7 +162,7 @@ public class Transaction extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new Transaction().setVisible(true);
+                //new Transaction().setVisible(true);
             }
         });
     }

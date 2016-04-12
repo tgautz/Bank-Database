@@ -6,6 +6,8 @@
 package database;
 
 import java.sql.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 /**
  *
  * @author Orc 9
@@ -13,6 +15,7 @@ import java.sql.*;
 public class MainScreen extends javax.swing.JFrame {
 
     private Statement stmt;
+    private Connection c;
     /**
      * Creates new form MainScreen
      */
@@ -20,10 +23,10 @@ public class MainScreen extends javax.swing.JFrame {
         initComponents();
         try {
             //initialize variables for SQL
-            Connection c = DriverManager.getConnection("jdbc:sqlite:bank.db");
+            c = DriverManager.getConnection("jdbc:sqlite:bank.db");
             c.setAutoCommit(false);
             stmt = c.createStatement();
-            //create tables in the database
+            /*//create tables in the database
             String sql = "";
             sql =   "CREATE TABLE CUSTOMER(" +
                     "SSN		CHAR(9)		PRIMARY KEY," +
@@ -62,7 +65,7 @@ public class MainScreen extends javax.swing.JFrame {
                     "FOREIGN KEY (CSSN) REFERENCES CUSTOMER(SSN)," +
                     "FOREIGN KEY (Account_ID) REFERENCES ACCOUNT(ID)," +
                     "FOREIGN KEY (ESSN) REFERENCES EMPLOYEE(SSN));";
-            stmt.executeUpdate(sql);
+            stmt.executeUpdate(sql);*/
         }
         catch (SQLException e) {
             System.out.println("\nSomething went wrong...: "+e.getMessage());
@@ -87,6 +90,11 @@ public class MainScreen extends javax.swing.JFrame {
         jButton6 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                formWindowClosing(evt);
+            }
+        });
 
         jButton1.setText("View Employees");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
@@ -202,13 +210,24 @@ public class MainScreen extends javax.swing.JFrame {
 
     private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
         // Open New Account button pressed
-        new NewAccount().setVisible(true);
+        new NewAccount(stmt).setVisible(true);
     }//GEN-LAST:event_jButton6ActionPerformed
 
     private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
         // Request Transaction button pressed
-        new Transaction().setVisible(true);
+        new Transaction(stmt).setVisible(true);
     }//GEN-LAST:event_jButton5ActionPerformed
+
+    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+        try {
+            // TODO add your handling code here:
+            stmt.close();
+            c.commit();
+            c.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(MainScreen.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_formWindowClosing
 
     /**
      * @param args the command line arguments

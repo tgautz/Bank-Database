@@ -49,8 +49,6 @@ public class VisibleTable extends javax.swing.JFrame {
         } catch(Exception e) {
             JOptionPane.showMessageDialog(null, "Request failed!!!!");
         }
-        //display JTable with new values
-        jTable1.repaint();
     }
 
     /**
