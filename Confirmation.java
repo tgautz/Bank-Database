@@ -5,6 +5,8 @@
  */
 package database;
 
+import java.sql.*;
+
 /**
  *
  * @author Orc 9
@@ -14,7 +16,7 @@ public class Confirmation extends javax.swing.JFrame {
     /**
      * Creates new form Confirmation
      */
-    public Confirmation() {
+    public Confirmation(Statement stmt, boolean isApproved, boolean isDeposit, int id, double newAmount) {
         initComponents();
     }
 
@@ -114,7 +116,7 @@ public class Confirmation extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new Confirmation().setVisible(true);
+                //new Confirmation().setVisible(true);
             }
         });
     }

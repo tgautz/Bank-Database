@@ -197,7 +197,7 @@ public class NewAccount extends javax.swing.JFrame {
                                                   "0.00, "+ //starting balance
                                                   interestRate+");"; //interest rate
                             stmt.executeUpdate(sql);
-                            System.out.println("Account created with id: "+nextAccountID);
+                            JOptionPane.showMessageDialog(null, "Account created with id: "+nextAccountID);
                             accountCreatedAlready = true;
                         }
                         String ssn = jTable1.getValueAt(i, 0).toString();

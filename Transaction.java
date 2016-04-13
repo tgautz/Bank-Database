@@ -6,6 +6,9 @@
 package database;
 
 import java.sql.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -17,10 +20,17 @@ public class Transaction extends javax.swing.JFrame {
      * Creates new form Transaction
      */
     private Statement stmt;
+    private String id, essn;
+    private double balance;
     
     public Transaction(Statement stmt) {
         initComponents();
         this.stmt = stmt;
+        jSeparator1.setVisible(false);
+        jComboBox1.setVisible(false);
+        jTextField3.setVisible(false);
+        jLabel2.setVisible(false);
+        jButton2.setVisible(false);
     }
 
     /**
@@ -40,6 +50,7 @@ public class Transaction extends javax.swing.JFrame {
         jSeparator1 = new javax.swing.JSeparator();
         jPasswordField1 = new javax.swing.JPasswordField();
         jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -54,7 +65,12 @@ public class Transaction extends javax.swing.JFrame {
 
         jComboBox1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Deposit", "Withdraw", "Balance Inquiry" }));
 
-        jTextField3.setText("$0.00");
+        jTextField3.setText("0.00");
+        jTextField3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextField3ActionPerformed(evt);
+            }
+        });
 
         jButton2.setText("Submit");
         jButton2.addActionListener(new java.awt.event.ActionListener() {
@@ -74,6 +90,8 @@ public class Transaction extends javax.swing.JFrame {
 
         jLabel1.setText("Customer SSN:");
 
+        jLabel2.setText("$");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -87,13 +105,16 @@ public class Transaction extends javax.swing.JFrame {
                         .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPasswordField1)))
-                .addGap(23, 23, 23)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 12, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jComboBox1, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jTextField3)
-                    .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jTextField3)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -108,7 +129,8 @@ public class Transaction extends javax.swing.JFrame {
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel2))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton1)
@@ -130,7 +152,44 @@ public class Transaction extends javax.swing.JFrame {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // Request Access button
+        String ssn = new String(jPasswordField1.getPassword()); //Customer SSN
+        id = jTextField2.getText(); //Acount ID #
+        ResultSet rs;
+        try {
+            rs = stmt.executeQuery("SELECT A.Balance " +
+                                   "FROM ACCOUNT AS A, ACCOUNT_AUTHORIZATION AS AA " +
+                                   "WHERE AA.SSN='"+ssn+"' AND AA.ID="+id+" AND A.ID=AA.ID;");
+            if(rs.next())
+            {
+                balance = Double.parseDouble(rs.getString(1));
+                JOptionPane.showMessageDialog(null, "Current balance: $"+balance);
+                essn = JOptionPane.showInputDialog("Enter Employee SSN");
+                rs = stmt.executeQuery("SELECT * " +
+                                       "FROM EMPLOYEE " +
+                                       "WHERE SSN='"+essn+"';");
+                if(rs.next())
+                {
+                    //make other fields visible
+                    jSeparator1.setVisible(true);
+                    jComboBox1.setVisible(true);
+                    jTextField3.setVisible(true);
+                    jLabel2.setVisible(true);
+                    jButton2.setVisible(true);
+                }
+                else
+                    JOptionPane.showMessageDialog(null, "ERROR: Employee doesn't exist");
+            }
+            else
+                JOptionPane.showMessageDialog(null, "ERROR: Customer doesn't exist or doesn't have authorization to access this account");
+        } catch (SQLException ex) {
+            Logger.getLogger(Transaction.class.getName()).log(Level.SEVERE, null, ex);
+        }
+                    
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jTextField3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField3ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jTextField3ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -172,6 +231,7 @@ public class Transaction extends javax.swing.JFrame {
     private javax.swing.JButton jButton2;
     private javax.swing.JComboBox jComboBox1;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JPasswordField jPasswordField1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JTextField jTextField2;
