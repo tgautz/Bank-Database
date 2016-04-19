@@ -20,7 +20,7 @@ public class Transaction extends javax.swing.JFrame {
      * Creates new form Transaction
      */
     private Statement stmt;
-    private String id, essn;
+    private String id, cssn, essn;
     private double balance;
     
     public Transaction(Statement stmt) {
@@ -52,7 +52,7 @@ public class Transaction extends javax.swing.JFrame {
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
         jTextField2.setText("Account ID #");
 
@@ -63,7 +63,7 @@ public class Transaction extends javax.swing.JFrame {
             }
         });
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Deposit", "Withdraw", "Balance Inquiry" }));
+        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Deposit", "Withdraw" }));
 
         jTextField3.setText("0.00");
         jTextField3.addActionListener(new java.awt.event.ActionListener() {
@@ -148,17 +148,46 @@ public class Transaction extends javax.swing.JFrame {
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // Submit button
+        if(jComboBox1.getSelectedIndex()==0) //deposit
+        {
+            try {
+                //error checking -- is balance a number
+                double change = Double.parseDouble(jTextField3.getText());
+                change = Math.round(change*100)/100.0;
+                new Confirmation(stmt, true, true, id, balance, change, cssn, essn).setVisible(true);
+            }
+            catch(Exception e) {
+                JOptionPane.showMessageDialog(null, "ERROR: deposit amount must be a number");//throw error
+                return;
+            }
+        }
+        else //withdraw
+        {
+            try {
+                //error checking -- is balance a number
+                double change = Double.parseDouble(jTextField3.getText());
+                change = Math.round(change*100)/100.0;
+                if(balance >= change)
+                    new Confirmation(stmt, true, false, id, balance, change, cssn, essn).setVisible(true);
+                else
+                    new Confirmation(stmt, false, false, id, balance, change, cssn, essn).setVisible(true);
+            }
+            catch(Exception e) {
+                JOptionPane.showMessageDialog(null, "ERROR: deposit amount must be a number");//throw error
+                return;
+            }
+        }
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // Request Access button
-        String ssn = new String(jPasswordField1.getPassword()); //Customer SSN
+        cssn = new String(jPasswordField1.getPassword()); //Customer SSN
         id = jTextField2.getText(); //Acount ID #
         ResultSet rs;
         try {
             rs = stmt.executeQuery("SELECT A.Balance " +
                                    "FROM ACCOUNT AS A, ACCOUNT_AUTHORIZATION AS AA " +
-                                   "WHERE AA.SSN='"+ssn+"' AND AA.ID="+id+" AND A.ID=AA.ID;");
+                                   "WHERE AA.CSSN='"+cssn+"' AND AA.ID="+id+" AND A.ID=AA.ID;");
             if(rs.next())
             {
                 balance = Double.parseDouble(rs.getString(1));

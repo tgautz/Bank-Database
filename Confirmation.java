@@ -6,6 +6,7 @@
 package database;
 
 import java.sql.*;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -16,8 +17,36 @@ public class Confirmation extends javax.swing.JFrame {
     /**
      * Creates new form Confirmation
      */
-    public Confirmation(Statement stmt, boolean isApproved, boolean isDeposit, int id, double newAmount) {
+    private Statement stmt;
+    private boolean isDeposit;
+    private String id;
+    private double oldAmount;
+    private double change;
+    private String cssn;
+    private String essn;
+    
+    public Confirmation(Statement stmt, boolean isApproved, boolean isDeposit, String id, double oldAmount, double change, String cssn, String essn) {
         initComponents();
+        if(!isApproved)
+        {
+            jButton1.setVisible(false);
+            jButton2.setVisible(false);
+            jLabel1.setText("Transaction: NOT APPROVED! -- not enough money in account");
+        }
+        else
+        {
+            if(isDeposit)
+                jButton1.setText("Receive from Customer $"+change);
+            else
+                jButton1.setText("Give Customer $"+change);
+        }
+        this.stmt = stmt;
+        this.isDeposit = isDeposit;
+        this.id = id;
+        this.oldAmount = oldAmount;
+        this.change = change;
+        this.cssn = cssn;
+        this.essn = essn;
     }
 
     /**
@@ -80,10 +109,35 @@ public class Confirmation extends javax.swing.JFrame {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
+        double balance = oldAmount;
+        if(isDeposit)
+            balance += change;
+        else
+            balance -= change;
+        try {
+            //change balance in account
+            stmt.executeUpdate("UPDATE ACCOUNT " +
+                               "SET Balance=" + balance +
+                              " WHERE ID="+id+";");
+            //add to transaction table
+            String type;
+            if(isDeposit)
+                type = "Deposit";
+            else
+                type = "Withdraw";
+            stmt.executeUpdate("INSERT INTO TRANS_ACTION (Timestamp, CSSN, Account_ID, Type, Amount, ESSN) " +
+                    "VALUES ((SELECT datetime('now')), "+cssn+", "+id+", '"+type+"', "+change+", "+essn+");");
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "ERROR: update failed -- " + e.getMessage());
+        }
+        
+        JOptionPane.showMessageDialog(null, "New account balance: $"+balance);
+        this.setVisible(false);
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
+        this.setVisible(false);
     }//GEN-LAST:event_jButton2ActionPerformed
 
     /**

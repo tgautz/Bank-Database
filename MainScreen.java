@@ -5,9 +5,15 @@
  */
 package database;
 
+import java.awt.Desktop;
+import java.io.File;
+import java.io.IOException;
 import java.sql.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+import jxl.Workbook;
+import jxl.write.*;
 /**
  *
  * @author Orc 9
@@ -88,6 +94,7 @@ public class MainScreen extends javax.swing.JFrame {
         jButton5 = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         jButton6 = new javax.swing.JButton();
+        jButton7 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -141,6 +148,13 @@ public class MainScreen extends javax.swing.JFrame {
             }
         });
 
+        jButton7.setText("Print Statement");
+        jButton7.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton7ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -162,7 +176,8 @@ public class MainScreen extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jButton6)
-                    .addComponent(jButton5))
+                    .addComponent(jButton5)
+                    .addComponent(jButton7))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -182,6 +197,8 @@ public class MainScreen extends javax.swing.JFrame {
                 .addComponent(jButton6)
                 .addGap(18, 18, 18)
                 .addComponent(jButton5)
+                .addGap(18, 18, 18)
+                .addComponent(jButton7)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -229,6 +246,60 @@ public class MainScreen extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_formWindowClosing
 
+    private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed
+        // TODO add your handling code here:
+        try
+        {
+            WritableWorkbook wBook; //this is the Excel file
+            WritableSheet masterSheet; //these are the 3 sheets in the Excel file
+            //declare font and font size (Times New Roman, size 12)
+            WritableCellFormat cellFormat = new WritableCellFormat(new WritableFont(WritableFont.TIMES,12));
+            cellFormat.setWrap(true);
+            //create an Excel file at the designated file location on the computer
+            wBook = Workbook.createWorkbook(new File("statement.xls"));
+            //initialize sheets' names and tab locations
+            masterSheet = wBook.createSheet("Statement",0);
+            String id = JOptionPane.showInputDialog("Enter Account ID #");
+            
+            masterSheet.setColumnView(0,21,cellFormat);
+            masterSheet.setColumnView(1,14,cellFormat);
+            masterSheet.setColumnView(2,12,cellFormat);
+            masterSheet.setColumnView(3,12,cellFormat);
+            masterSheet.setColumnView(4,16,cellFormat);
+            
+            masterSheet.addCell(new Label(0,0,"Timestamp",cellFormat));
+            masterSheet.addCell(new Label(1,0,"Customer SSN",cellFormat));
+            masterSheet.addCell(new Label(2,0,"Type",cellFormat));
+            masterSheet.addCell(new Label(3,0,"Amount",cellFormat));
+            masterSheet.addCell(new Label(4,0,"Employee SSN",cellFormat));
+            
+            ResultSet rs = stmt.executeQuery("SELECT * " + 
+                                             "FROM TRANS_ACTION " +
+                                             "WHERE Account_ID=" + id + ";");
+            for(int row = 1; rs.next(); row++)
+            {
+                //fill columns in this row
+                for(int col = 1; col<=2; col++)
+                    //fill element in visible table
+                    masterSheet.addCell(new Label(col-1,row,rs.getString(col),cellFormat));
+                for(int col = 4; col<=6; col++)
+                    //fill element in visible table
+                    masterSheet.addCell(new Label(col-2,row,rs.getString(col),cellFormat));
+            }
+            
+            wBook.write();
+            wBook.close();
+            Desktop.getDesktop().open(new File("statement.xls"));
+        }
+        catch(IOException e) {
+            JOptionPane.showMessageDialog(null, "ERROR: new file failed -- " + e.getMessage());
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "ERROR: query failed -- " + e.getMessage());
+        } catch (WriteException e) {
+            JOptionPane.showMessageDialog(null, "ERROR: write failed -- " + e.getMessage());
+        }
+    }//GEN-LAST:event_jButton7ActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -271,6 +342,7 @@ public class MainScreen extends javax.swing.JFrame {
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
     private javax.swing.JButton jButton6;
+    private javax.swing.JButton jButton7;
     private javax.swing.JLabel jLabel1;
     // End of variables declaration//GEN-END:variables
 }
