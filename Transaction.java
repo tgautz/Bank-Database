@@ -1,7 +1,5 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Transaction verifies and adds a transaction to the customer's statement
  */
 package database;
 
@@ -10,22 +8,19 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
-/**
- *
- * @author Orc 9
- */
+
 public class Transaction extends javax.swing.JFrame {
 
-    /**
-     * Creates new form Transaction
-     */
+    //global variables for easier access
     private Statement stmt;
     private String id, cssn, essn;
     private double balance;
     
+    //only constructor
     public Transaction(Statement stmt) {
         initComponents();
         this.stmt = stmt;
+        //make the right side disappear until account access is granted
         jSeparator1.setVisible(false);
         jComboBox1.setVisible(false);
         jTextField3.setVisible(false);
@@ -148,12 +143,14 @@ public class Transaction extends javax.swing.JFrame {
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // Submit button
-        if(jComboBox1.getSelectedIndex()==0) //deposit
+        if(jComboBox1.getSelectedIndex()==0) //if this is a deposit
         {
             try {
                 //error checking -- is balance a number
                 double change = Double.parseDouble(jTextField3.getText());
+                //round to the 100ths place
                 change = Math.round(change*100)/100.0;
+                //show confirmation window -- APPROVED
                 new Confirmation(stmt, true, true, id, balance, change, cssn, essn).setVisible(true);
             }
             catch(Exception e) {
@@ -167,13 +164,13 @@ public class Transaction extends javax.swing.JFrame {
                 //error checking -- is balance a number
                 double change = Double.parseDouble(jTextField3.getText());
                 change = Math.round(change*100)/100.0;
-                if(balance >= change)
+                if(balance >= change) //if enough money in account, show confirmation window -- APPROVED
                     new Confirmation(stmt, true, false, id, balance, change, cssn, essn).setVisible(true);
-                else
+                else //else, not enough money in account -- NOT APPROVED
                     new Confirmation(stmt, false, false, id, balance, change, cssn, essn).setVisible(true);
             }
             catch(Exception e) {
-                JOptionPane.showMessageDialog(null, "ERROR: deposit amount must be a number");//throw error
+                JOptionPane.showMessageDialog(null, "ERROR: deposit/withdraw amount must be a number");//throw error
                 return;
             }
         }
@@ -182,20 +179,27 @@ public class Transaction extends javax.swing.JFrame {
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // Request Access button
         cssn = new String(jPasswordField1.getPassword()); //Customer SSN
-        id = jTextField2.getText(); //Acount ID #
+        id = jTextField2.getText(); //Account ID #
         ResultSet rs;
         try {
+            //verify the customer wanting access to the account has authorization
             rs = stmt.executeQuery("SELECT A.Balance " +
                                    "FROM ACCOUNT AS A, ACCOUNT_AUTHORIZATION AS AA " +
                                    "WHERE AA.CSSN='"+cssn+"' AND AA.ID="+id+" AND A.ID=AA.ID;");
+            //if they are authorized, show right side of window
             if(rs.next())
             {
+                //get current balance in account
                 balance = Double.parseDouble(rs.getString(1));
+                //display current balance
                 JOptionPane.showMessageDialog(null, "Current balance: $"+balance);
+                //get employee ssn
                 essn = JOptionPane.showInputDialog("Enter Employee SSN");
+                //make sure the given employee SSN is actually an employee
                 rs = stmt.executeQuery("SELECT * " +
                                        "FROM EMPLOYEE " +
                                        "WHERE SSN='"+essn+"';");
+                //if this is actually an employee, show right side of window
                 if(rs.next())
                 {
                     //make other fields visible

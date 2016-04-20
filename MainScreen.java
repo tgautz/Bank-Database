@@ -1,7 +1,5 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ *  Main Screen is the main menu for accessing the entire program
  */
 package database;
 
@@ -14,35 +12,35 @@ import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import jxl.Workbook;
 import jxl.write.*;
-/**
- *
- * @author Orc 9
- */
+
+
 public class MainScreen extends javax.swing.JFrame {
 
+    //variables accessed by multiple functions (button presses) below
     private Statement stmt;
     private Connection c;
     /**
      * Creates new form MainScreen
      */
     public MainScreen() {
+        //initialize GUI via Netbeans default code
         initComponents();
         try {
             //initialize variables for SQL
             c = DriverManager.getConnection("jdbc:sqlite:bank.db");
             c.setAutoCommit(false);
             stmt = c.createStatement();
-            /*//create tables in the database
+            /*//create tables in the database -- uncomment for creating a new database
             String sql = "";
             sql =   "CREATE TABLE CUSTOMER(" +
                     "SSN		CHAR(9)		PRIMARY KEY," +
-                    "Full_name		VARCHAR(80)," +
+                    "Full_name		VARCHAR(80)     NOT NULL," +
                     "Birthdate		DATE		NOT NULL," +
                     "Sex		CHAR(1));";
             stmt.executeUpdate(sql);
             sql =   "CREATE TABLE EMPLOYEE(" +
                     "SSN		CHAR(9)		PRIMARY KEY," +
-                    "Full_name		VARCHAR(80)," +
+                    "Full_name		VARCHAR(80)     NOT NULL," +
                     "Birthdate		DATE		NOT NULL," +
                     "Sex		CHAR(1)," +
                     "Position		VARCHAR(20)," +
@@ -74,7 +72,7 @@ public class MainScreen extends javax.swing.JFrame {
             stmt.executeUpdate(sql);*/
         }
         catch (SQLException e) {
-            System.out.println("\nSomething went wrong...: "+e.getMessage());
+            JOptionPane.showMessageDialog(null, "ERROR: " + e.getMessage());
         }
     }
 
@@ -236,8 +234,8 @@ public class MainScreen extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton5ActionPerformed
 
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+        //when the window closes, commit changes to the database file and close objects
         try {
-            // TODO add your handling code here:
             stmt.close();
             c.commit();
             c.close();
@@ -247,50 +245,54 @@ public class MainScreen extends javax.swing.JFrame {
     }//GEN-LAST:event_formWindowClosing
 
     private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed
-        // TODO add your handling code here:
+        // Print Statement button pressed
         try
         {
             WritableWorkbook wBook; //this is the Excel file
-            WritableSheet masterSheet; //these are the 3 sheets in the Excel file
+            WritableSheet masterSheet; //this is a sheet in the Excel file
             //declare font and font size (Times New Roman, size 12)
             WritableCellFormat cellFormat = new WritableCellFormat(new WritableFont(WritableFont.TIMES,12));
+            //turn word wrap on if needed
             cellFormat.setWrap(true);
             //create an Excel file at the designated file location on the computer
             wBook = Workbook.createWorkbook(new File("statement.xls"));
-            //initialize sheets' names and tab locations
+            //initialize sheet name
             masterSheet = wBook.createSheet("Statement",0);
+            //get account number from user
             String id = JOptionPane.showInputDialog("Enter Account ID #");
             
+            //set column widths in Excel file
             masterSheet.setColumnView(0,21,cellFormat);
-            masterSheet.setColumnView(1,14,cellFormat);
+            masterSheet.setColumnView(1,20,cellFormat);
             masterSheet.setColumnView(2,12,cellFormat);
             masterSheet.setColumnView(3,12,cellFormat);
-            masterSheet.setColumnView(4,16,cellFormat);
-            
+            masterSheet.setColumnView(4,20,cellFormat);
+            //give header names
             masterSheet.addCell(new Label(0,0,"Timestamp",cellFormat));
-            masterSheet.addCell(new Label(1,0,"Customer SSN",cellFormat));
+            masterSheet.addCell(new Label(1,0,"Customer Name",cellFormat));
             masterSheet.addCell(new Label(2,0,"Type",cellFormat));
             masterSheet.addCell(new Label(3,0,"Amount",cellFormat));
-            masterSheet.addCell(new Label(4,0,"Employee SSN",cellFormat));
-            
-            ResultSet rs = stmt.executeQuery("SELECT * " + 
-                                             "FROM TRANS_ACTION " +
-                                             "WHERE Account_ID=" + id + ";");
+            masterSheet.addCell(new Label(4,0,"Employee Name",cellFormat));
+            //get transaction details
+            ResultSet rs = stmt.executeQuery("SELECT T.Timestamp, C.Full_name, Account_ID, T.Type, T.Amount, E.Full_name " + 
+                                             "FROM TRANS_ACTION AS T INNER JOIN EMPLOYEE AS E INNER JOIN CUSTOMER AS C " +
+                                             "WHERE T.Account_ID=" + id + " AND C.SSN=T.CSSN AND E.SSN=T.ESSN;");
+            //populate Excel file from the query
             for(int row = 1; rs.next(); row++)
             {
                 //fill columns in this row
                 for(int col = 1; col<=2; col++)
-                    //fill element in visible table
                     masterSheet.addCell(new Label(col-1,row,rs.getString(col),cellFormat));
                 for(int col = 4; col<=6; col++)
-                    //fill element in visible table
                     masterSheet.addCell(new Label(col-2,row,rs.getString(col),cellFormat));
             }
-            
+            //flush output and close
             wBook.write();
             wBook.close();
+            //open Excel file with default program
             Desktop.getDesktop().open(new File("statement.xls"));
         }
+        //catch the various exceptions that may be thrown
         catch(IOException e) {
             JOptionPane.showMessageDialog(null, "ERROR: new file failed -- " + e.getMessage());
         } catch (SQLException e) {

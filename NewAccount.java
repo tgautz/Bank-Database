@@ -1,7 +1,5 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * New Account opens a new account with the bank for a customer already existing in the CUSTOMER relation
  */
 package database;
 
@@ -12,15 +10,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
-/**
- *
- * @author Orc 9
- */
+
 public class NewAccount extends javax.swing.JFrame {
 
-    /**
-     * Creates new form NewAccount
-     */
+    //global variable from constructor
     private Statement stmt;
     
     public NewAccount(Statement stmt) {
@@ -140,7 +133,8 @@ public class NewAccount extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox1ActionPerformed
-        // TODO add your handling code here:
+        //Checking/Savings combo box selection alters whether 
+        //interest rate text field is visible or not
         if(jComboBox1.getSelectedIndex()==0)
             jTextField1.setVisible(false);
         else
@@ -148,12 +142,14 @@ public class NewAccount extends javax.swing.JFrame {
     }//GEN-LAST:event_jComboBox1ActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
+        //Create Account button is pressed
+        //initialize interest rate to null
         String interestRate = "NULL";
+        //if this is a savings account, get interest rate
         if(jComboBox1.getSelectedIndex()==1)
         {
             try {
-                //error checking -- is year a number?
+                //error checking -- is interest rate a number?
                 Double.parseDouble(jTextField1.getText());
                 interestRate = jTextField1.getText();
             }
@@ -162,71 +158,72 @@ public class NewAccount extends javax.swing.JFrame {
                 return;
             }
         }
+        //initialize local variables
         ResultSet rs;
         int nextAccountID = -1;
         try {
+            //execute query, to get next available account number
             rs = stmt.executeQuery("SELECT MAX(ID) " +
                                    "FROM ACCOUNT;");
+            //if there is no next avvailable, kill this object
             if(!rs.next())
             {
                 this.setVisible(false);
                 return;
             }
+            //else, set next available account number
             nextAccountID = rs.getInt(1)+1;
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, "ERROR: query1 failed");
-            System.out.println(ex.getMessage());
             return;
         }
         boolean accountCreatedAlready = false; //flag
+        //check all cells in SSN table for values
         for(int i=0; i<jTable1.getRowCount(); i++)
         {
-            //System.out.println("value at "+i+": "+jTable1.getValueAt(i, 0));
+            //if cell is not blank
             if(jTable1.getValueAt(i, 0) != null)
             {
                 try {
+                    //see if the person's SSN exists in the CUSTOMER relation
                     rs = stmt.executeQuery("SELECT SSN " +
                                            "FROM CUSTOMER " +
                                            "WHERE SSN='"+jTable1.getValueAt(i, 0)+"';");
+                    //if it exists,
                     if(rs.next())
                     {
+                        //create an account if this is the first SSN to be entered
                         if(!accountCreatedAlready)
                         {
+                            //delcare SQL statement and execute
                             String sql = "INSERT INTO ACCOUNT (ID, Balance, Interest_rate) " +
                                          "VALUES ("+nextAccountID+", "+ //ID
                                                   "0.00, "+ //starting balance
                                                   interestRate+");"; //interest rate
                             stmt.executeUpdate(sql);
+                            //if no exception thrown, give account id #
                             JOptionPane.showMessageDialog(null, "Account created with id: "+nextAccountID);
+                            //set flag
                             accountCreatedAlready = true;
                         }
+                        //add authorization to access this new account to the SSNs provided
                         String ssn = jTable1.getValueAt(i, 0).toString();
                         String sql = "INSERT INTO ACCOUNT_AUTHORIZATION (ID, CSSN) " +
                                      "VALUES ("+nextAccountID+", "+ //ID
                                               ssn+");"; //Customer SSN
                         stmt.executeUpdate(sql);   
+                        //close this window when done
                         this.setVisible(false);
                     }
+                    //show various possible errors
                     else
                         JOptionPane.showMessageDialog(null, "ERROR: Customer doesn't exist");
                 } catch (SQLException ex) {
                     JOptionPane.showMessageDialog(null, "ERROR: query2 failed");
-                    //System.out.println(ex.getMessage());
                     return;
                 }
             }
         }
-        try {
-            rs = stmt.executeQuery("SELECT A.ID, A.Balance, A.Interest_rate, AA.CSSN " +
-                                   "FROM ACCOUNT AS A, ACCOUNT_AUTHORIZATION AS AA " +
-                                   "WHERE A.ID=AA.ID;");
-            for(int i=0; rs.next(); i++)
-                System.out.println(rs.getString(1)+"  \t  "+rs.getString(2)+"  \t  "+rs.getString(3)+"  \t  "+rs.getString(4));
-        } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(null, "ERROR: query3 failed");
-            System.out.println(ex.getMessage());
-        }
-        
     }//GEN-LAST:event_jButton1ActionPerformed
 
     /**

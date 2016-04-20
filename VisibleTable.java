@@ -1,7 +1,6 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Visible Table displays peoples' information from the EMPLOYEE or CUSTOMER relations
+ * based off of the information provided in the constructor
  */
 package database;
 
@@ -10,10 +9,7 @@ import java.util.Enumeration;
 import javax.swing.JOptionPane;
 import javax.swing.table.TableColumn;
 
-/**
- *
- * @author Orc 9
- */
+
 public class VisibleTable extends javax.swing.JFrame {
 
     //only constructor that displays a ResultSet in a JTable

@@ -1,22 +1,15 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Confirmation confirms to the teller if the transaction is allowed, and what to receive/give from/to the customer
  */
 package database;
 
 import java.sql.*;
 import javax.swing.JOptionPane;
 
-/**
- *
- * @author Orc 9
- */
+
 public class Confirmation extends javax.swing.JFrame {
 
-    /**
-     * Creates new form Confirmation
-     */
+    //global variables
     private Statement stmt;
     private boolean isDeposit;
     private String id;
@@ -25,14 +18,17 @@ public class Confirmation extends javax.swing.JFrame {
     private String cssn;
     private String essn;
     
+    //only constructor containing lots of valuable information
     public Confirmation(Statement stmt, boolean isApproved, boolean isDeposit, String id, double oldAmount, double change, String cssn, String essn) {
         initComponents();
+        //if not approved, inform user
         if(!isApproved)
         {
             jButton1.setVisible(false);
             jButton2.setVisible(false);
             jLabel1.setText("Transaction: NOT APPROVED! -- not enough money in account");
         }
+        //else, set button text based on deposit/withdraw
         else
         {
             if(isDeposit)
@@ -40,6 +36,7 @@ public class Confirmation extends javax.swing.JFrame {
             else
                 jButton1.setText("Give Customer $"+change);
         }
+        //set global variables
         this.stmt = stmt;
         this.isDeposit = isDeposit;
         this.id = id;
@@ -108,7 +105,8 @@ public class Confirmation extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
+        //Give $$ / Receive $$ button pressed to verify transaction
+        //find new balance based off of previous balance
         double balance = oldAmount;
         if(isDeposit)
             balance += change;
@@ -125,18 +123,19 @@ public class Confirmation extends javax.swing.JFrame {
                 type = "Deposit";
             else
                 type = "Withdraw";
+            //execute update to add transaction to the transaction table
             stmt.executeUpdate("INSERT INTO TRANS_ACTION (Timestamp, CSSN, Account_ID, Type, Amount, ESSN) " +
                     "VALUES ((SELECT datetime('now')), "+cssn+", "+id+", '"+type+"', "+change+", "+essn+");");
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "ERROR: update failed -- " + e.getMessage());
         }
-        
+        //display new account balance and close this window
         JOptionPane.showMessageDialog(null, "New account balance: $"+balance);
         this.setVisible(false);
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        // TODO add your handling code here:
+        // Cancel Transaction button is pressed -- close this window
         this.setVisible(false);
     }//GEN-LAST:event_jButton2ActionPerformed
 

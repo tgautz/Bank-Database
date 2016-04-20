@@ -1,17 +1,12 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * New Person adds people to the EMPLOYEE or CUSTOMER relations
  */
 package database;
 
 import java.sql.*;
 import javax.swing.JOptionPane;
 
-/**
- *
- * @author Orc 9
- */
+
 public class NewPerson extends javax.swing.JFrame {
 
     //private global variables
